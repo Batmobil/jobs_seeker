@@ -1,0 +1,5 @@
+Notes on jobs dashboard:
+add cities Dropdown
+check data and dates on Graph
+deploy to heroku with automatic scrape script run.
+improve dashboard viz.
