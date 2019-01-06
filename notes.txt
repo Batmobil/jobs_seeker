@@ -1,5 +1,6 @@
 Notes on jobs dashboard:
 add cities Dropdown
 check data and dates on Graph
+add graph with % of total jobs for ds and da positions, add total jobs baseline.
 deploy to heroku with automatic scrape script run.
 improve dashboard viz.
