@@ -51,7 +51,7 @@ def push_rds_mysql_table(engine, df, table):
     return df
 
 max_results_per_city = 300
-city_set = ["Montréal%2C+QC"]
+city_set = ["Montréal%2C+QC", "Vancouver%2C+BC"]
 positions = ["data+scientist", "data+analyst"]
 columns = ["city", "job_title", "company_name", "location", "summary", "salary"]
 sample_df = pd.DataFrame(columns = columns)
