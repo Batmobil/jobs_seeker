@@ -1,6 +1,7 @@
 Notes on jobs dashboard:
 add cities Dropdown
-check data and dates on Graph
+check data and dates on Graph (for now graph is cumulative, we need to change this)
 add graph with % of total jobs for ds and da positions, add total jobs baseline.
+Add column chart by companies (stack by sponsored or not?)
 deploy to heroku with automatic scrape script run.
 improve dashboard viz.
