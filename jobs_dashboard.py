@@ -11,6 +11,7 @@ from datetime import datetime as dt
 import pandas as pd
 from sqlalchemy import create_engine
 from dask import delayed as delay
+import ipdb
 
 @delay
 def lazy_fetch_rds_mysql(engine, query, params={}):
@@ -36,8 +37,8 @@ jobs_df = jobs_data.compute()
 # nsdq = nsdq.set_index('Symbol')
 positions = [{'label': pos, 'value': pos} for pos in sorted(jobs_df['position'].unique().tolist())]
 cities = jobs_df['city'].str.strip('%').unique().tolist()
-locations = [{'label': loc.rstrip(r'%'), 'value': loc} for loc in sorted(jobs_df['city'].unique().tolist())]
-
+locations = [{'label': loc.split('%2C')[0], 'value': loc} for loc in sorted(jobs_df['city'].unique().tolist())]
+# ipdb.set_trace()
 # # Define layout.
 app.layout = html.Div([ # ext div.
     html.H1('Jobs Dashboard', id='dashboard_title'),
@@ -57,9 +58,6 @@ app.layout = html.Div([ # ext div.
         dcc.Dropdown(
             id='location_dropdown',
             options = locations,
-                # [
-                # {'label': 'AAPL', 'value': 'AAPL'}
-                # ], # We'll need to modify this with companies symbol in df.
                 value = ['Montréal', 'Vancouver'],
                 multi = True)],
         style={'width': '30%', 'display': 'inline-block', 'verticalAlign':'top'}),
