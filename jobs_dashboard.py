@@ -34,6 +34,7 @@ rds_connection = 'mysql+mysqldb://baptiste:baptiste86@persoinstance.cy0uxhmwetgv
 rds_engine = create_engine(rds_connection)
 jobs_data = lazy_fetch_rds_mysql(rds_engine, query_jobs_data, params={'start': start_date, 'end': end_date})
 jobs_df = jobs_data.compute()
+jobs_df['cnt']=1
 # nsdq = nsdq.set_index('Symbol')
 positions = [{'label': pos, 'value': pos} for pos in sorted(jobs_df['position'].unique().tolist())]
 cities = jobs_df['city'].str.strip('%').unique().tolist()
@@ -74,7 +75,7 @@ app.layout = html.Div([ # ext div.
         id = 'submit_button',
         n_clicks=0,
         children='Submit',
-        style={'fontSize':28}
+        style={'fontSize':24, 'marginLeft':'30px'}
     ),
     html.Div([ dcc.Graph(id='feature_graphic',
                         figure = {'data':[
@@ -98,10 +99,11 @@ def update_graph(n_clicks, symbols, locations, start_date, end_date):
             # TODO: to be modified. use index for ts in order to have daily count?
             # df = web.DataReader(symb, 'iex', start_date, end_date)
             df = jobs_df[ (jobs_df['position'] == symb) & (jobs_df['city'] == location)]
-            # df['ts'] = pd.to_datetime(df['ts'])
-            df['cnt'] = 1
+            df = df.groupby('ts')['cnt'].sum()
+            print(df.head())
+            # df['ts'] = pd.to_datetime(df['ts']
             # df.set_index('ts')
-            traces.append({'x': df['ts'], 'y': df['cnt'].sum(), 'name': symb})
+            traces.append({'x': df.index, 'y': df.values, 'name': symb + ' - ' + location})
     fig = { 'data':traces,
             'layout':{'title': symbols}
         }
