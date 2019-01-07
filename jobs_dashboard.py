@@ -28,7 +28,7 @@ app = dash.Dash()
 
 # Load Data.
 start_date = dt(2019, 1, 1)
-end_date = dt.today().date()
+end_date = dt.now()
 query_jobs_data = """SELECT * FROM indeed WHERE ts >= %(start)s AND ts < %(end)s """
 rds_connection = 'mysql+mysqldb://baptiste:baptiste86@persoinstance.cy0uxhmwetgv.us-east-1.rds.amazonaws.com:3306/jobs_db?charset=utf8'
 rds_engine = create_engine(rds_connection)
@@ -58,7 +58,7 @@ app.layout = html.Div([ # ext div.
         dcc.Dropdown(
             id='location_dropdown',
             options = locations,
-                value = ['Montréal', 'Vancouver'],
+                value = ["Montréal%2C+QC"],
                 multi = True)],
         style={'width': '30%', 'display': 'inline-block', 'verticalAlign':'top'}),
     html.Div([
@@ -95,10 +95,13 @@ def update_graph(n_clicks, symbols, locations, start_date, end_date):
     traces = []
     for symb in symbols:
         for location in locations:
-            # TODO: to be modified.
+            # TODO: to be modified. use index for ts in order to have daily count?
             # df = web.DataReader(symb, 'iex', start_date, end_date)
             df = jobs_df[ (jobs_df['position'] == symb) & (jobs_df['city'] == location)]
-            traces.append({'x': df['ts'], 'y': df['position'].count(), 'name': symb})
+            # df['ts'] = pd.to_datetime(df['ts'])
+            df['cnt'] = 1
+            # df.set_index('ts')
+            traces.append({'x': df['ts'], 'y': df['cnt'].sum(), 'name': symb})
     fig = { 'data':traces,
             'layout':{'title': symbols}
         }
