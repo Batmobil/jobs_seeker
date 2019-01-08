@@ -3,6 +3,7 @@
 
 # Imports.
 import dash
+import dash_auth
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
@@ -23,8 +24,11 @@ def lazy_fetch_rds_mysql(engine, query, params={}):
     finally:
         engineCon.close()
     return df
-# Define app.
+# Define app and authentication.
+USERNAME_PASSWORD_PAIRS = [['baptiste', 'baptiste86']]
 app = dash.Dash()
+auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
+server = app.server
 
 # Load Data.
 start_date = dt(2019, 1, 1)
