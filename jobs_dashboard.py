@@ -79,9 +79,13 @@ app.layout = html.Div([ # ext div.
         id = 'submit_button',
         n_clicks=0,
         children='Submit',
-        style={'fontSize':24, 'marginLeft':'30px'}
+        style={'fontSize':24, 'marginLeft':'20px'}
     ),
     html.Div([ dcc.Graph(id='feature_graphic',
+                        figure = {'data':[
+                                    {'x': [1,2], 'y': [3,1]}],
+                        'layout':{'title': ''}})]),
+    html.Div([ dcc.Graph(id='feature_graphic2',
                         figure = {'data':[
                                     {'x': [1,2], 'y': [3,1]}],
                         'layout':{'title': ''}})])
@@ -104,12 +108,52 @@ def update_graph(n_clicks, symbols, locations, start_date, end_date):
             # df = web.DataReader(symb, 'iex', start_date, end_date)
             df = jobs_df[ (jobs_df['position'] == symb) & (jobs_df['city'] == location)]
             df = df.groupby('ts')['cnt'].sum()
-            print(df.head())
-            # df['ts'] = pd.to_datetime(df['ts']
-            # df.set_index('ts')
-            traces.append({'x': df.index, 'y': df.values, 'name': symb + ' - ' + location})
+            traces.append({'x': df.index, 'y': df.values, 'name': symb + ' - ' + location.split('%')[0]})
     fig = { 'data':traces,
-            'layout':{'title': symbols}
+            'layout':{
+            'title': symbols,
+            'autosize':True,
+            'yaxis':{
+                'title':"# of jobs"
+                }
+            }
+        }
+    return fig
+
+# update 2nd graph for % jobs
+@app.callback(
+    Output('feature_graphic2', 'figure'),
+    [Input('submit_button', 'n_clicks')],
+    [State('symbol_dropdown', 'value'),
+     State('location_dropdown', 'value'),
+     State('date_picker_range' ,'start_date'),
+     State('date_picker_range' ,'end_date')],
+    )
+def update_graph2(n_clicks, symbols, locations, start_date, end_date):
+    traces = []
+    for symb in symbols:
+        for location in locations:
+            # TODO: to be modified. use index for ts in order to have daily count?
+            # df = web.DataReader(symb, 'iex', start_date, end_date)
+            df = jobs_df[ (jobs_df['position'] == symb) & (jobs_df['city'] == location)]
+            df_total_location = jobs_df[ (jobs_df['city'] == location)]
+            df = df.groupby('ts')['cnt'].sum()
+            df_total_location = df_total_location.groupby('ts')['cnt'].sum()
+            print(df)
+            print(df_total_location)
+            df_ratio = df / df_total_location
+            print(df_ratio.head())
+            # df_ratio = df_ratio.groupby('ts').sum()
+
+            traces.append({'x': df.index, 'y': 100 * df_ratio.values, 'name': symb + ' - ' + location.split('%')[0]})
+    fig = { 'data':traces,
+            'layout':{
+            'title': symbols,
+            'autosize':True,
+            'yaxis':{
+                'title':"% of positions among DA and DS"
+                }
+            }
         }
     return fig
 
