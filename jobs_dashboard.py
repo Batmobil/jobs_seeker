@@ -7,6 +7,9 @@ import dash_auth
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+import plotly.offline as pyo
+import plotly.graph_objs as go
+
 from datetime import datetime as dt
 # import pandas_datareader.data as web
 import pandas as pd
@@ -43,18 +46,34 @@ jobs_df['cnt']=1
 positions = [{'label': pos, 'value': pos} for pos in sorted(jobs_df['position'].unique().tolist())]
 cities = jobs_df['city'].str.strip('%').unique().tolist()
 locations = [{'label': loc.split('%2C')[0], 'value': loc} for loc in sorted(jobs_df['city'].unique().tolist())]
+
+# count by company:
+company_traces = []
+companies_df = jobs_df.groupby(['city', 'company_name'])['cnt'].sum().sort_values(ascending=False)
+companies = companies_df.index
+for company in companies:
+    # df = df.groupby('ts')['cnt'].sum()
+    company_traces.append({'x': company, 'y': companies_df.loc[company], 'name':company})
+
 # ipdb.set_trace()
 # # Define layout.
 app.layout = html.Div([ # ext div.
     html.H1('Jobs Dashboard', id='dashboard_title'),
+     # dcc.Tabs(
+     #            id="tabs",
+     #            style={"height":"20","verticalAlign":"middle"},
+     #            children=[
+     #                dcc.Tab(label="Count", value="opportunities_tab"),
+     #                dcc.Tab(label="Leads", value="leads_tab"),
+     #                dcc.Tab(id="cases_tab",label="Cases", value="cases_tab"),
+     #            ],
+     #            value="leads_tab",
+     #        ),
     html.Div([
         html.H4('Select position:'),
         dcc.Dropdown(
             id='symbol_dropdown',
             options = positions,
-                # [
-                # {'label': 'AAPL', 'value': 'AAPL'}
-                # ], # We'll need to modify this with companies symbol in df.
                 value = ['data scientist', 'data analyst'],
                 multi = True)],
         style={'width': '30%', 'display': 'inline-block', 'verticalAlign':'top'}),
@@ -88,10 +107,40 @@ app.layout = html.Div([ # ext div.
     html.Div([ dcc.Graph(id='feature_graphic2',
                         figure = {'data':[
                                     {'x': [1,2], 'y': [3,1]}],
-                        'layout':{'title': ''}})])
+                        'layout':{'title': ''}})]),
+    html.Div([ dcc.Graph(
+    figure=go.Figure(
+        # data = company_traces,
+        data=[
+            go.Bar(
+                x=companies,
+                y=companies_df.values,
+                name='Rest of world',
+                # marker=go.bar.Marker(
+                #     color='rgb(55, 83, 109)'
+                # )
+            ),
+        ],
+        layout=go.Layout(
+            title='# of jobs postings by company',
+            showlegend=True,
+            # legend=go.layout.Legend(
+            #     x=0,
+            #     y=1.0
+            # ),
+            # margin=go.Layout.Margin(l=40, r=0, t=40, b=30)
+        )
+    ),
+    style={'height': 300},
+    id='companies-barchart'
+)])
+
+
+
 ], style={'padding':10})
-#
+################
 # # Callbacks:
+################
 @app.callback(
     Output('feature_graphic', 'figure'),
     [Input('submit_button', 'n_clicks')],
@@ -121,6 +170,7 @@ def update_graph(n_clicks, symbols, locations, start_date, end_date):
     return fig
 
 # update 2nd graph for % jobs
+
 @app.callback(
     Output('feature_graphic2', 'figure'),
     [Input('submit_button', 'n_clicks')],
@@ -156,6 +206,40 @@ def update_graph2(n_clicks, symbols, locations, start_date, end_date):
             }
         }
     return fig
+
+# # update Bar chart graph for jobs postings by companies.
+
+@app.callback(
+    Output('companies-barchart', 'figure'),
+    [Input('submit_button', 'n_clicks')],
+    [State('symbol_dropdown', 'value'),
+     State('location_dropdown', 'value'),
+     State('date_picker_range' ,'start_date'),
+     State('date_picker_range' ,'end_date')],
+    )
+def update_barchart(n_clicks, symbols, locations, start_date, end_date):
+    company_traces = []
+    for location in locations:
+        comp_city = companies_df.loc[location].head(30)
+        print(comp_city.head())
+        company_traces.append(go.Bar(
+                                x=comp_city.index,
+                                y=companies_df.values,
+                                name=location,
+                                    )
+                            )
+    fig = { 'data':company_traces,
+            'layout':{
+            'title': 'Top 30 companies by count of jobs postings',
+            'showlegend':True,
+            'autosize':True,
+            'yaxis':{
+                'title':"# of jobs postings"
+                }
+            }
+        }
+    return fig
+
 
 # Launch server.
 if __name__ == '__main__':
