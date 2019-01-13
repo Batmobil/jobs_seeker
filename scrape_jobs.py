@@ -122,4 +122,6 @@ for position in positions:
     # sample_df.to_csv("[filepath].csv", encoding='utf-8')
     rds_connection = 'mysql+mysqldb://baptiste:baptiste86@persoinstance.cy0uxhmwetgv.us-east-1.rds.amazonaws.com:3306/jobs_db?charset=utf8'
     rds_engine = create_engine(rds_connection)
+    print('Appending {} rows to table.'.format(jobs_reduced))
     push_rds_mysql_table(rds_engine, jobs_reduced, 'indeed' )
+    print('Done.')
