@@ -9,3 +9,11 @@ add graph with ration over city population
 Before to deploy, create 2 branches on git, one for dev, one for prod.
 deploy to heroku with automatic scrape script run.
 improve dashboard viz.
+---
+
+Metrio clone interface
+
+---
+tracking on plotly dash community
+---
+Tracking and basic NLP on Nuclear and SCWR
