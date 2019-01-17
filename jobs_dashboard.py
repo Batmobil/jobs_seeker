@@ -76,7 +76,7 @@ app.layout = html.Div([ # ext div.
             options = positions,
                 value = ['data scientist', 'data analyst'],
                 multi = True)],
-        style={'width': '30%', 'display': 'inline-block', 'verticalAlign':'top'}),
+        style={'width': '20%', 'height': 10, 'display': 'block', 'verticalAlign':'top'}),
     html.Div([
         html.H4('Select location:'),
         dcc.Dropdown(
@@ -84,7 +84,7 @@ app.layout = html.Div([ # ext div.
             options = locations,
                 value = ["Montréal%2C+QC"],
                 multi = True)],
-        style={'width': '30%', 'display': 'inline-block', 'verticalAlign':'top'}),
+        style={'width': '20%', 'display': 'block', 'verticalAlign':'top'}),
     html.Div([
         html.H4('Select Start and End Date:'),
         dcc.DatePickerRange(
@@ -93,7 +93,7 @@ app.layout = html.Div([ # ext div.
             end_date = end_date
         )
     ],
-        style={'width': '30%', 'display': 'inline-block'}),
+        style={'width': '30%', 'display': 'block'}),
     html.Button(
         id = 'submit_button',
         n_clicks=0,
