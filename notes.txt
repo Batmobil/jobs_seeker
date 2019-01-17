@@ -1,14 +1,16 @@
 Notes on jobs dashboard:
+Dockerize app
 add cities Dropdown
 check data and dates on Graph (for now graph is cumulative, we need to change this)
 add graph with % of total jobs for ds and da positions, add total jobs baseline.
 Add column chart by companies (stack by sponsored or not?)
 add tabs.
 add graph with month to month variations
+add pie chart with ratio of positions.
 add graph with ration over city population
 Before to deploy, create 2 branches on git, one for dev, one for prod.
 deploy to heroku with automatic scrape script run.
-improve dashboard viz.
+improve dashboard viz --> will need to leanr more about html and css.
 ---
 
 Metrio clone interface
