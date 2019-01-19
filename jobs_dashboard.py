@@ -58,7 +58,27 @@ for company in companies:
 # ipdb.set_trace()
 # # Define layout.
 app.layout = html.Div([ # ext div.
-    html.H1('Jobs Dashboard', id='dashboard_title'),
+    # Banner display
+    html.Div([
+        html.H2(
+            'Jobs Dashboard',
+            id='dashboard_title'
+        ),
+        html.Img(
+            src="https://i.ibb.co/vZpKhd1/hypercube.jpg"
+        )
+    ],
+        className="banner"
+    ),
+    # html.Div([
+    #     html.H1(
+    #         'Jobs Dashboard',
+    #         id='dashboard_title'
+    #     )
+    # ],
+    #     className="banner"
+    # ),
+
      # dcc.Tabs(
      #            id="tabs",
      #            style={"height":"20","verticalAlign":"middle"},
@@ -70,36 +90,96 @@ app.layout = html.Div([ # ext div.
      #            value="leads_tab",
      #        ),
     html.Div([
-        html.H4('Select position:'),
-        dcc.Dropdown(
-            id='symbol_dropdown',
-            options = positions,
-                value = ['data scientist', 'data analyst'],
-                multi = True)],
-        style={'width': '20%', 'height': 10, 'display': 'block', 'verticalAlign':'top'}),
-    html.Div([
-        html.H4('Select location:'),
-        dcc.Dropdown(
-            id='location_dropdown',
-            options = locations,
-                value = ["Montréal%2C+QC"],
-                multi = True)],
-        style={'width': '20%', 'display': 'block', 'verticalAlign':'top'}),
-    html.Div([
-        html.H4('Select Start and End Date:'),
-        dcc.DatePickerRange(
-            id='date_picker_range',
-            start_date = start_date,
-            end_date = end_date
-        )
-    ],
-        style={'width': '30%', 'display': 'block'}),
-    html.Button(
-        id = 'submit_button',
-        n_clicks=0,
-        children='Submit',
-        style={'fontSize':24, 'marginLeft':'20px'}
+        html.Div(className="row", style={'margin-bottom':'8px'}, children=[
+            html.Div(className="ten columns", children=[
+                html.Div(
+                    className="four columns",
+                    children=[
+                        html.H6('Position:'),
+                        dcc.Dropdown(
+                            id='symbol_dropdown',
+                            options = positions,
+                            placeholder='Select a position',
+                            value = ['data scientist', 'data analyst'],
+                            multi = True
+                        )
+                    ]
+                ),
+
+                html.Div(
+                    className="four columns",
+                    children=[
+                        html.H6('Location:'),
+                        dcc.Dropdown(
+                            id='location_dropdown',
+                            options = locations,
+                            placeholder='Select a location',
+                            value = ["Montréal%2C+QC"],
+                            multi = True
+                        )
+                    ]
+                ),
+                html.Div(
+                    # html.H4('Select Start and End Date:'),
+                    children=[ html.H6('Start and End Date:'),
+                        dcc.DatePickerRange(
+                            id='date_picker_range',
+                            start_date = start_date,
+                            end_date = end_date
+                        )],
+                    # style={'width': '30%', 'display': 'block'},
+                    className='four columns'
+                ),
+                html.Div(
+                    children = html.Button(
+                        id = 'submit_button',
+                        n_clicks=0,
+                        children='Submit',
+                        # style={'fontSize':24, 'marginLeft':'20px'}
+                    ),
+                    className='one columns'
+                )
+
+            ]),
+
+            # html.Div(id="div-total-step-count", className="two columns")
+        ]),
+        ],
+        className="container"
     ),
+
+    # html.Div([
+    #     html.H4('Select position:'),
+    #     dcc.Dropdown(
+    #         id='symbol_dropdown',
+    #         options = positions,
+    #             value = ['data scientist', 'data analyst'],
+    #             multi = True)],
+    #     style={'width': '20%', 'height': 10, 'display': 'block', 'verticalAlign':'top'}),
+    # html.Div([
+    #     html.H4('Select location:'),
+    #     dcc.Dropdown(
+    #         id='location_dropdown',
+    #         options = locations,
+    #             value = ["Montréal%2C+QC"],
+    #             multi = True)],
+    #     style={'width': '20%', 'display': 'block', 'verticalAlign':'top'}),
+    # html.Div([
+    #     html.H4('Select Start and End Date:'),
+    #     dcc.DatePickerRange(
+    #         id='date_picker_range',
+    #         start_date = start_date,
+    #         end_date = end_date
+    #     )
+    # ],
+    #     style={'width': '30%', 'display': 'block'}
+    # ),
+    # html.Button(
+    #     id = 'submit_button',
+    #     n_clicks=0,
+    #     children='Submit',
+    #     style={'fontSize':24, 'marginLeft':'20px'}
+    # ),
     html.Div([ dcc.Graph(id='feature_graphic',
                         figure = {'data':[
                                     {'x': [1,2], 'y': [3,1]}],
@@ -115,7 +195,7 @@ app.layout = html.Div([ # ext div.
             go.Bar(
                 x=companies,
                 y=companies_df.values,
-                name='Rest of world',
+                # name='Rest of world',
                 # marker=go.bar.Marker(
                 #     color='rgb(55, 83, 109)'
                 # )
@@ -240,6 +320,17 @@ def update_barchart(n_clicks, symbols, locations, start_date, end_date):
         }
     return fig
 
+# CSS styling
+external_css = [
+    "https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css",  # Normalize the CSS
+    "https://fonts.googleapis.com/css?family=Open+Sans|Roboto"  # Fonts
+    "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css",
+    "https://cdn.rawgit.com/xhlulu/0acba79000a3fd1e6f552ed82edb8a64/raw/dash_template.css",
+    "https://rawgit.com/plotly/dash-live-model-training/master/custom_styles.css"
+]
+
+for css in external_css:
+    app.css.append_css({"external_url": css})
 
 # Launch server.
 if __name__ == '__main__':
