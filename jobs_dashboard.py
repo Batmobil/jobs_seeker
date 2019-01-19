@@ -243,4 +243,4 @@ def update_barchart(n_clicks, symbols, locations, start_date, end_date):
 
 # Launch server.
 if __name__ == '__main__':
-    app.run_server()
+    app.run_server(host='0.0.0.0')
