@@ -7,10 +7,11 @@ Add column chart by companies (stack by sponsored or not?)
 add tabs.
 add graph with month to month variations
 add pie chart with ratio of positions.
-add graph with ration over city population
+add graph with ratio over city population
+Add NLP about jobs description
 Before to deploy, create 2 branches on git, one for dev, one for prod.
 deploy to heroku with automatic scrape script run.
-improve dashboard viz --> will need to leanr more about html and css.
+improve dashboard viz --> will need to leanr more about html and css., layout : https://github.com/plotly/dash-live-model-training/blob/master/app.py
 ---
 
 Metrio clone interface
@@ -19,3 +20,5 @@ Metrio clone interface
 tracking on plotly dash community
 ---
 Tracking and basic NLP on Nuclear and SCWR
+---
+Deployment on AWS ElasticBeanStalk, add a Dockerrun.aws.json file and zip all the files at root (not the root folder) in a zip
