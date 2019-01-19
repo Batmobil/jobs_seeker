@@ -5,6 +5,7 @@ check data and dates on Graph (for now graph is cumulative, we need to change th
 add graph with % of total jobs for ds and da positions, add total jobs baseline.
 Add column chart by companies (stack by sponsored or not?)
 add tabs.
+Add a gauge with week difference of jobs postings in %.
 add graph with month to month variations
 add pie chart with ratio of positions.
 add graph with ratio over city population
