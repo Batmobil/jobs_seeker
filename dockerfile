@@ -1,6 +1,6 @@
-FROM python:3
+FROM python:3.6.7
 
-COPY requirements-simple.txt /
+COPY linux_pip_requirements.txt /
 RUN pip install -r /linux_pip_requirements.txt
 
 RUN mkdir /myworkdir
