@@ -58,6 +58,10 @@ for company in companies:
 # ipdb.set_trace()
 # # Define layout.
 app.layout = html.Div([ # ext div.
+    dcc.Tabs(id="tabs-example", value='tab-1-example', children=[
+        dcc.Tab(label='Tab One', value='tab-1-example'),
+        dcc.Tab(label='Tab Two', value='tab-2-example'),
+    ]),
     # Banner display
     html.Div([
         html.H2(
@@ -70,25 +74,9 @@ app.layout = html.Div([ # ext div.
     ],
         className="banner"
     ),
-    # html.Div([
-    #     html.H1(
-    #         'Jobs Dashboard',
-    #         id='dashboard_title'
-    #     )
-    # ],
-    #     className="banner"
-    # ),
 
-     # dcc.Tabs(
-     #            id="tabs",
-     #            style={"height":"20","verticalAlign":"middle"},
-     #            children=[
-     #                dcc.Tab(label="Count", value="opportunities_tab"),
-     #                dcc.Tab(label="Leads", value="leads_tab"),
-     #                dcc.Tab(id="cases_tab",label="Cases", value="cases_tab"),
-     #            ],
-     #            value="leads_tab",
-     #        ),
+
+    html.Div(id='tabs-content-example'),
     html.Div([
         html.Div(className="row", style={'margin-bottom':'8px'}, children=[
             html.Div(className="ten columns", children=[
