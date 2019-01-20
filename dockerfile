@@ -1,6 +1,6 @@
 FROM python:3.6.7
 
-COPY linux_pip_requirements.txt /
+COPY requirements/linux_pip_requirements.txt /
 RUN pip install -r /linux_pip_requirements.txt
 
 RUN mkdir /myworkdir
