@@ -13,6 +13,12 @@ Add NLP about jobs description
 Before to deploy, create 2 branches on git, one for dev, one for prod.
 deploy to heroku with automatic scrape script run.
 improve dashboard viz --> will need to leanr more about html and css., layout : https://github.com/plotly/dash-live-model-training/blob/master/app.py
+
+structure project
+mount volume into container
+tabs
+start from arxiv stuff from rishabh or merlin or add NLP of jobs description
+clean up graphs
 ---
 
 Metrio clone interface
