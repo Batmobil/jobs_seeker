@@ -33,7 +33,7 @@ USERNAME_PASSWORD_PAIRS = [['baptiste', 'baptiste86']]
 app = dash.Dash()
 auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
 server = app.server
-
+app.config['suppress_callback_exceptions']=True # allow to separate the layout for each tab in separate callbacks.
 # Load Data.
 start_date = dt(2019, 1, 1)
 end_date = dt.now()
@@ -110,7 +110,7 @@ tab_1_layout = [html.Div([
                     children=[
                         html.H6('Position:'),
                         dcc.Dropdown(
-                            id='symbol_dropdown',
+                            id='position_dropdown',
                             options = positions,
                             placeholder='Select a position',
                             value = ['data scientist', 'data analyst'],
@@ -193,8 +193,8 @@ tab_1_layout = [html.Div([
                 )
             ),
             style={'height': 300},
-        )]
-        id='companies-barchart'
+        )],
+        id='companies-barchart',
     )
 ]
 ################
@@ -207,19 +207,6 @@ tab_1_layout = [html.Div([
 def render_content(tab):
     if tab == 'tab-1-example':
         return tab_1_layout
-        # return html.Div([
-        #     html.H3('Tab content 1'),
-        #     dcc.Graph(
-        #         id='graph-1-tabs',
-        #         figure={
-        #             'data': [{
-        #                 'x': [1, 2, 3],
-        #                 'y': [3, 1, 2],
-        #                 'type': 'bar'
-        #             }]
-        #         }
-        #     )
-        # ])
     elif tab == 'tab-2-example':
         return html.Div([
             html.H3('Tab content 2'),
@@ -242,7 +229,7 @@ def render_content(tab):
 @app.callback(
     Output('feature_graphic', 'figure'),
     [Input('submit_button', 'n_clicks')],
-    [State('symbol_dropdown', 'value'),
+    [State('position_dropdown', 'value'),
      State('location_dropdown', 'value'),
      State('date_picker_range' ,'start_date'),
      State('date_picker_range' ,'end_date')],
@@ -272,34 +259,52 @@ def update_graph(n_clicks, symbols, locations, start_date, end_date):
 @app.callback(
     Output('feature_graphic2', 'figure'),
     [Input('submit_button', 'n_clicks')],
-    [State('symbol_dropdown', 'value'),
+    [State('position_dropdown', 'value'),
      State('location_dropdown', 'value'),
      State('date_picker_range' ,'start_date'),
      State('date_picker_range' ,'end_date')],
     )
-def update_graph2(n_clicks, symbols, locations, start_date, end_date):
+def update_graph2(n_clicks, positions, locations, start_date, end_date):
     traces = []
-    for symb in symbols:
-        for location in locations:
-            # TODO: to be modified. use index for ts in order to have daily count?
-            # df = web.DataReader(symb, 'iex', start_date, end_date)
-            df = jobs_df[ (jobs_df['position'] == symb) & (jobs_df['city'] == location)]
-            df_total_location = jobs_df[ (jobs_df['city'] == location)]
-            df = df.groupby('ts')['cnt'].sum()
-            df_total_location = df_total_location.groupby('ts')['cnt'].sum()
-            print(df)
-            print(df_total_location)
-            df_ratio = df / df_total_location
-            print(df_ratio.head())
-            # df_ratio = df_ratio.groupby('ts').sum()
+    # We only compute ratio from DA position numbers as we have less timestamps for this position.
+    # for position in positions:
+    for location in locations:
+        # TODO: to be modified. use index for ts in order to have daily count?
+        # df = web.DataReader(symb, 'iex', start_date, end_date)
+        df = jobs_df[ (jobs_df['position'] == 'data analyst') & (jobs_df['city'] == location)]
+        df_total_location = jobs_df[ (jobs_df['city'] == location)]
+        df = df.groupby('ts')['cnt'].sum()
+        # df = df.resample('D').ffill()
+        # df = df.rolling(4).mean()
+        df_total_location = df_total_location.groupby('ts')['cnt'].sum()
+        # df_total_location = df_total_location.resample('D').ffill()
+        # df_total_location = df_total_location.rolling(4).mean()
+        print(df)
+        print(df_total_location)
+        df_ratio = df / df_total_location
+        print(df_ratio.head())
+        df_complement = 1 - df_ratio
+        # df_ratio = df_ratio.groupby('ts').sum()
 
-            traces.append({'x': df.index, 'y': 100 * df_ratio.values, 'name': symb + ' - ' + location.split('%')[0]})
+        traces.append({'x': df_ratio.index,
+                       'y': 100 * df_ratio.values,
+                       'name': 'data analyst' + ' - ' + location.split('%')[0],
+                       'mode': 'lines',
+                       'stackgroup': 'one' })
+        traces.append({'x': df_complement.index,
+                       'y': 100 * df_complement.values,
+                       'name': 'data scientist' + ' - ' + location.split('%')[0],
+                       'mode': 'lines',
+                       'stackgroup': 'one'})
     fig = { 'data':traces,
             'layout':{
-            'title': symbols,
+            'title': positions,
             'autosize':True,
             'yaxis':{
-                'title':"% of positions among DA and DS"
+                'title':"% of positions among DA and DS",
+                'type': 'linear',
+                'range': [1, 100],
+                'ticksuffix': '%'
                 }
             }
         }
@@ -310,7 +315,7 @@ def update_graph2(n_clicks, symbols, locations, start_date, end_date):
 @app.callback(
     Output('companies-barchart', 'figure'),
     [Input('submit_button', 'n_clicks')],
-    [State('symbol_dropdown', 'value'),
+    [State('position_dropdown', 'value'),
      State('location_dropdown', 'value'),
      State('date_picker_range' ,'start_date'),
      State('date_picker_range' ,'end_date')],
