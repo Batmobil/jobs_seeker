@@ -16,6 +16,9 @@ import pandas as pd
 from sqlalchemy import create_engine
 from dask import delayed as delay
 import ipdb
+# project import
+from jobs_dashboard_callbacks import register_jobs_dashboard_callbacks
+from jobs_dashboard_layout import register_jobs_dashboard_layout
 
 # fetch data from DB.
 @delay
@@ -51,10 +54,13 @@ locations = [{'label': loc.split('%2C')[0], 'value': loc} for loc in sorted(jobs
 # count by company:
 company_traces = []
 companies_df = jobs_df.groupby(['city', 'company_name'])['cnt'].sum().sort_values(ascending=False)
-companies = companies_df.index
-for company in companies:
-    # df = df.groupby('ts')['cnt'].sum()
-    company_traces.append({'x': company, 'y': companies_df.loc[company], 'name':company})
+companies = companies_df.index.get_level_values(1).tolist()
+# TODO: to be corrected as now companies_df has city index as ell.
+# for city in companies_df.index.get_level_values(0).tolist():
+    # for company in companies:
+for (city, company) in companies_df.index:
+        # df = df.groupby('ts')['cnt'].sum()
+    company_traces.append({'x': company, 'y': companies_df.loc[(city, company)], 'name':company})
 
 # Set Tabs style:
 tabs_styles = {
@@ -79,269 +85,179 @@ tab_selected_style = {
 ###################
 # # Define layout.
 ###################
-#app layout.
-app.layout = html.Div([ # ext div.
-    dcc.Tabs(id="tabs-example", value='tab-1-example', children=[
-        dcc.Tab(label='Tab One', value='tab-1-example', style=tab_style, selected_style=tab_selected_style),
-        dcc.Tab(label='Tab Two', value='tab-2-example', style=tab_style, selected_style=tab_selected_style),
-    ],
-    style=tabs_styles),
-    html.Div(id='tabs-content-example')
-], style={'padding':10})
-
 # tab-1 layout.
 # Banner display
-tab_1_layout = [html.Div([
-        html.H2(
-            'Jobs Dashboard',
-            id='dashboard_title'
-        ),
-        html.Img(
-            src="https://i.ibb.co/vZpKhd1/hypercube.jpg"
-        )
-    ],
-        className="banner"
-    ),
-    html.Div([
-        html.Div(className="row", style={'margin-bottom':'8px'}, children=[
-            html.Div(className="ten columns", children=[
-                html.Div(
-                    className="four columns",
-                    children=[
-                        html.H6('Position:'),
-                        dcc.Dropdown(
-                            id='position_dropdown',
-                            options = positions,
-                            placeholder='Select a position',
-                            value = ['data scientist', 'data analyst'],
-                            multi = True
-                        )
-                    ]
-                ),
-
-                html.Div(
-                    className="four columns",
-                    children=[
-                        html.H6('Location:'),
-                        dcc.Dropdown(
-                            id='location_dropdown',
-                            options = locations,
-                            placeholder='Select a location',
-                            value = ["Montréal%2C+QC"],
-                            multi = True
-                        )
-                    ]
-                ),
-                html.Div(
-                    # html.H4('Select Start and End Date:'),
-                    children=[ html.H6('Start and End Date:'),
-                        dcc.DatePickerRange(
-                            id='date_picker_range',
-                            start_date = start_date,
-                            end_date = end_date
-                        )],
-                    # style={'width': '30%', 'display': 'block'},
-                    className='four columns'
-                ),
-                html.Div(
-                    children = html.Button(
-                        id = 'submit_button',
-                        n_clicks=0,
-                        children='Submit',
-                        # style={'fontSize':24, 'marginLeft':'20px'}
-                    ),
-                    className='one columns'
-                )
-
-            ]),
-
-            # html.Div(id="div-total-step-count", className="two columns")
-        ]),
-        ],
-        className="container"
-    ),
-    html.Div([ dcc.Graph(id='feature_graphic',
-                        figure = {'data':[
-                                    {'x': [1,2], 'y': [3,1]}],
-                        'layout':{'title': ''}})]),
-    html.Div([ dcc.Graph(id='feature_graphic2',
-                        figure = {'data':[
-                                    {'x': [1,2], 'y': [3,1]}],
-                        'layout':{'title': ''}})]),
-    html.Div([
-        dcc.Graph(
-            figure=go.Figure(
-                # data = company_traces,
-                data=[
-                    go.Bar(
-                        x=companies,
-                        y=companies_df.values,
-                        # name='Rest of world',
-                        # marker=go.bar.Marker(
-                        #     color='rgb(55, 83, 109)'
-                        # )
-                    ),
-                ],
-                layout=go.Layout(
-                    title='# of jobs postings by company',
-                    showlegend=True,
-                    # legend=go.layout.Legend(
-                    #     x=0,
-                    #     y=1.0
-                    # ),
-                    # margin=go.Layout.Margin(l=40, r=0, t=40, b=30)
-                )
-            ),
-            style={'height': 300},
-        )],
-        id='companies-barchart',
-    )
-]
-################
-# # Callbacks:
-################
-# Callback for tabs:
-# TODO: put each tab in separate files.
-@app.callback(Output('tabs-content-example', 'children'),
-              [Input('tabs-example', 'value')])
-def render_content(tab):
-    if tab == 'tab-1-example':
-        return tab_1_layout
-    elif tab == 'tab-2-example':
-        return html.Div([
-            html.H3('Tab content 2'),
-            dcc.Graph(
-                id='graph-2-tabs',
-                figure={
-                    'data': [{
-                        'x': [1, 2, 3],
-                        'y': [5, 10, 6],
-                        'type': 'bar'
-                    }]
-                }
-            )
-        ])
+# tab_1_layout = html.Div(
+#     children =[
+#         html.Div([
+#             html.H2(
+#                 'Jobs Dashboard',
+#                 id='dashboard_title'
+#             ),
+#             html.Img(
+#                 src="https://i.ibb.co/vZpKhd1/hypercube.jpg"
+#             )
+#         ],
+#             className="banner"
+#         ),
+#         html.Div(className="row", style={'margin-bottom':'8px'}, children=[
+#             html.Div(className="ten columns", children=[
+#                 html.Div(
+#                     className="four columns",
+#                     children=[
+#                         html.H6('Position:'),
+#                         dcc.Dropdown(
+#                             id='position_dropdown',
+#                             options = positions,
+#                             placeholder='Select a position',
+#                             value = ['data scientist', 'data analyst'],
+#                             multi = True
+#                         )
+#                     ]
+#                 ),
+#
+#                 ]
+#             )
+#             ]
+#         ),
+#         #Location drop-down component
+#         html.Div(
+#             className="four columns",
+#             children=[
+#                 html.H6('Location:'),
+#                 dcc.Dropdown(
+#                     id='location_dropdown',
+#                     options = locations,
+#                     placeholder='Select a location',
+#                     value = ["Montréal%2C+QC"],
+#                     multi = True
+#                 )
+#             ]
+#         ),
+#
+#         # Date range selection component.
+#         html.Div(
+#             # html.H4('Select Start and End Date:'),
+#             children=[ html.H6('Start and End Date:'),
+#                 dcc.DatePickerRange(
+#                     id='date_picker_range',
+#                     start_date = start_date,
+#                     end_date = end_date
+#                 )],
+#             # style={'width': '30%', 'display': 'block'},
+#             className='four columns'
+#         ),
+#         # Submit button component.
+#         html.Div(
+#             children = html.Button(
+#                 id = 'submit_button',
+#                 n_clicks=0,
+#                 children='Submit',
+#                 # style={'fontSize':24, 'marginLeft':'20px'}
+#             ),
+#             className='one columns'
+#         )
+# ])
 
 
+                # html.Div(
+                #     className="four columns",
+                #     children=[
+                #         html.H6('Location:'),
+                #         dcc.Dropdown(
+                #             id='location_dropdown',
+                #             options = locations,
+                #             placeholder='Select a location',
+                #             value = ["Montréal%2C+QC"],
+                #             multi = True
+                #         )
+                #     ]
+                # ),
+#                 html.Div(
+#                     # html.H4('Select Start and End Date:'),
+#                     children=[ html.H6('Start and End Date:'),
+#                         dcc.DatePickerRange(
+#                             id='date_picker_range',
+#                             start_date = start_date,
+#                             end_date = end_date
+#                         )],
+#                     # style={'width': '30%', 'display': 'block'},
+#                     className='four columns'
+#                 ),
+#                 html.Div(
+#                     children = html.Button(
+#                         id = 'submit_button',
+#                         n_clicks=0,
+#                         children='Submit',
+#                         # style={'fontSize':24, 'marginLeft':'20px'}
+#                     ),
+#                     className='one columns'
+#                 )
+#
+#             ]),
+#
+#             # html.Div(id="div-total-step-count", className="two columns")
+#         ]),
+#         ],
+#         className="container"
+#     ),
+#     html.Div([ dcc.Graph(id='feature_graphic',
+#                         figure = {'data':[
+#                                     {'x': [1,2], 'y': [3,1]}],
+#                         'layout':{'title': ''}})]),
+#     html.Div([ dcc.Graph(id='feature_graphic2',
+#                         figure = {'data':[
+#                                     {'x': [1,2], 'y': [3,1]}],
+#                         'layout':{'title': ''}})]),
+#     html.Div([
+#         dcc.Graph(
+#             id='companies-barchart',
+#             figure=go.Figure(
+#                 # data = company_traces,
+#                 data=[
+#                     go.Bar(
+#                         x=companies_df.loc["Montréal%2C+QC"].index,
+#                         y=companies_df.loc["Montréal%2C+QC"].values[:30],
+#                         name='Montréal',
+#                         # marker=go.bar.Marker(
+#                         #     color='rgb(55, 83, 109)'
+#                         # )
+#                     ),
+#                 ],
+#                 layout=go.Layout(
+#                     title='top 30 companies by count of jobs postings',
+#                     showlegend=True,
+#                     # legend=go.layout.Legend(
+#                     #     x=0,
+#                     #     y=1.0
+#                     # ),
+#                     # margin=go.Layout.Margin(l=40, r=0, t=40, b=30)
+#                 )
+#             ),
+#             style={'height': 300},
+#         )],
+#     )
+# ]
+
+#app layout.[
+
+jobs_layout = register_jobs_dashboard_layout(positions, locations, start_date, end_date)
+app.layout = jobs_layout
+#  html.Div([ # ext div.
+#     # dcc.Tabs(id="tabs-example", value='tab-1-example', children=[
+#     #     dcc.Tab(label='Tab One', value='tab-1-example', style=tab_style, selected_style=tab_selected_style),
+#     #     dcc.Tab(label='Tab Two', value='tab-2-example', style=tab_style, selected_style=tab_selected_style),
+#     # ],
+#     # style=tabs_styles),
+#     # html.Div(id='tabs-content-example'),
+#     tab_1_layout
+# ], style={'padding':10})
 
 
-
-@app.callback(
-    Output('feature_graphic', 'figure'),
-    [Input('submit_button', 'n_clicks')],
-    [State('position_dropdown', 'value'),
-     State('location_dropdown', 'value'),
-     State('date_picker_range' ,'start_date'),
-     State('date_picker_range' ,'end_date')],
-    )
-def update_graph(n_clicks, symbols, locations, start_date, end_date):
-    traces = []
-    for symb in symbols:
-        for location in locations:
-            # TODO: to be modified. use index for ts in order to have daily count?
-            # df = web.DataReader(symb, 'iex', start_date, end_date)
-            df = jobs_df[ (jobs_df['position'] == symb) & (jobs_df['city'] == location)]
-            df = df.groupby('ts')['cnt'].sum()
-            traces.append({'x': df.index, 'y': df.values, 'name': symb + ' - ' + location.split('%')[0]})
-    fig = { 'data':traces,
-            'layout':{
-            'title': symbols,
-            'autosize':True,
-            'yaxis':{
-                'title':"# of jobs"
-                }
-            }
-        }
-    return fig
-
-# update 2nd graph for % jobs
-
-@app.callback(
-    Output('feature_graphic2', 'figure'),
-    [Input('submit_button', 'n_clicks')],
-    [State('position_dropdown', 'value'),
-     State('location_dropdown', 'value'),
-     State('date_picker_range' ,'start_date'),
-     State('date_picker_range' ,'end_date')],
-    )
-def update_graph2(n_clicks, positions, locations, start_date, end_date):
-    traces = []
-    # We only compute ratio from DA position numbers as we have less timestamps for this position.
-    # for position in positions:
-    for location in locations:
-        # TODO: to be modified. use index for ts in order to have daily count?
-        # df = web.DataReader(symb, 'iex', start_date, end_date)
-        df = jobs_df[ (jobs_df['position'] == 'data analyst') & (jobs_df['city'] == location)]
-        df_total_location = jobs_df[ (jobs_df['city'] == location)]
-        df = df.groupby('ts')['cnt'].sum()
-        # df = df.resample('D').ffill()
-        # df = df.rolling(4).mean()
-        df_total_location = df_total_location.groupby('ts')['cnt'].sum()
-        # df_total_location = df_total_location.resample('D').ffill()
-        # df_total_location = df_total_location.rolling(4).mean()
-        print(df)
-        print(df_total_location)
-        df_ratio = df / df_total_location
-        print(df_ratio.head())
-        df_complement = 1 - df_ratio
-        # df_ratio = df_ratio.groupby('ts').sum()
-
-        traces.append({'x': df_ratio.index,
-                       'y': 100 * df_ratio.values,
-                       'name': 'data analyst' + ' - ' + location.split('%')[0],
-                       'mode': 'lines',
-                       'stackgroup': 'one' })
-        traces.append({'x': df_complement.index,
-                       'y': 100 * df_complement.values,
-                       'name': 'data scientist' + ' - ' + location.split('%')[0],
-                       'mode': 'lines',
-                       'stackgroup': 'one'})
-    fig = { 'data':traces,
-            'layout':{
-            'title': positions,
-            'autosize':True,
-            'yaxis':{
-                'title':"% of positions among DA and DS",
-                'type': 'linear',
-                'range': [1, 100],
-                'ticksuffix': '%'
-                }
-            }
-        }
-    return fig
-
-# # update Bar chart graph for jobs postings by companies.
-
-@app.callback(
-    Output('companies-barchart', 'figure'),
-    [Input('submit_button', 'n_clicks')],
-    [State('position_dropdown', 'value'),
-     State('location_dropdown', 'value'),
-     State('date_picker_range' ,'start_date'),
-     State('date_picker_range' ,'end_date')],
-    )
-def update_barchart(n_clicks, symbols, locations, start_date, end_date):
-    company_traces = []
-    for location in locations:
-        comp_city = companies_df.loc[location].head(30)
-        print(comp_city.head())
-        company_traces.append(go.Bar(
-                                x=comp_city.index,
-                                y=companies_df.values,
-                                name=location,
-                                    )
-                            )
-    fig = { 'data':company_traces,
-            'layout':{
-            'title': 'Top 30 companies by count of jobs postings',
-            'showlegend':True,
-            'autosize':True,
-            'yaxis':{
-                'title':"# of jobs postings"
-                }
-            }
-        }
-    return fig
+##############
+## Callbacks!
+##############
+register_jobs_dashboard_callbacks(app, jobs_df, companies_df)
 
 # CSS styling
 external_css = [
@@ -357,4 +273,4 @@ for css in external_css:
 
 # Launch server.
 if __name__ == '__main__':
-    app.run_server(host='0.0.0.0')
+    app.run_server(host='0.0.0.0', debug=True)
