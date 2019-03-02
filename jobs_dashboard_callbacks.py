@@ -5,6 +5,7 @@
 from dash.dependencies import Input, Output, State
 import plotly.offline as pyo
 import plotly.graph_objs as go
+import ipdb
 
 ################
 # # Callbacks:
@@ -77,22 +78,16 @@ def register_jobs_dashboard_callbacks(app, jobs_df, companies_df):
         # We only compute ratio from DA position numbers as we have less timestamps for this position.
         # for position in positions:
         for location in locations:
-            # TODO: to be modified. use index for ts in order to have daily count?
-            # df = web.DataReader(symb, 'iex', start_date, end_date)
             df = jobs_df[ (jobs_df['position'] == 'data analyst') & (jobs_df['city'] == location)]
             df_total_location = jobs_df[ (jobs_df['city'] == location)]
-            df = df.groupby('ts')['cnt'].sum()
-            # df = df.resample('D').ffill()
-            # df = df.rolling(4).mean()
+            df = df.groupby('ts')['cnt'].sum() # Count for data analyst positions
             df_total_location = df_total_location.groupby('ts')['cnt'].sum()
-            # df_total_location = df_total_location.resample('D').ffill()
-            # df_total_location = df_total_location.rolling(4).mean()
             print(df)
             print(df_total_location)
             df_ratio = df / df_total_location
+            df_ratio = df_ratio.interpolate()
             print(df_ratio.head())
             df_complement = 1 - df_ratio
-            # df_ratio = df_ratio.groupby('ts').sum()
 
             traces.append({'x': df_ratio.index,
                            'y': 100 * df_ratio.values,
