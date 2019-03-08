@@ -15,10 +15,17 @@ from datetime import datetime as dt
 import pandas as pd
 from sqlalchemy import create_engine
 from dask import delayed as delay
+import dask.dataframe as ddf
 import ipdb
 # project import
 from jobs_dashboard_callbacks import register_jobs_dashboard_callbacks
 from jobs_dashboard_layout import register_jobs_dashboard_layout
+
+# nlp imports
+import nltk
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.corpus import stopwords
+from nltk.tokenize import RegexpTokenizer
 
 # fetch data from DB.
 @delay
@@ -37,7 +44,10 @@ app = dash.Dash()
 auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
 server = app.server
 app.config['suppress_callback_exceptions']=True # allow to separate the layout for each tab in separate callbacks.
-# Load Data.
+
+######COMPUTE DATA TO PASS TO CALLBACKS.
+
+# Count by company.
 start_date = dt(2019, 1, 1)
 end_date = dt.now()
 query_jobs_data = """SELECT * FROM indeed WHERE ts >= %(start)s AND ts < %(end)s """
@@ -62,6 +72,17 @@ for (city, company) in companies_df.index:
         # df = df.groupby('ts')['cnt'].sum()
     company_traces.append({'x': company, 'y': companies_df.loc[(city, company)], 'name':company})
 
+
+# Word clouds data.
+query_jobs_data = """SELECT * FROM indeed WHERE ts >= %(start)s AND ts < %(end)s """
+rds_connection = 'mysql+mysqldb://baptiste:baptiste86@persoinstance.cy0uxhmwetgv.us-east-1.rds.amazonaws.com:3306/jobs_db?charset=utf8'
+summary_ddf = ddf.read_sql_table('indeed', rds_connection, index_col='ts')
+summary_ddf = summary_ddf[['summary']].reset_index()
+summary_ddf['date'] = summary_ddf['ts'].dt.date
+summary_df = summary_ddf[['date', 'summary']].compute()
+
+
+
 # Set Tabs style:
 tabs_styles = {
     'height': '44px'
@@ -85,159 +106,6 @@ tab_selected_style = {
 ###################
 # # Define layout.
 ###################
-# tab-1 layout.
-# Banner display
-# tab_1_layout = html.Div(
-#     children =[
-#         html.Div([
-#             html.H2(
-#                 'Jobs Dashboard',
-#                 id='dashboard_title'
-#             ),
-#             html.Img(
-#                 src="https://i.ibb.co/vZpKhd1/hypercube.jpg"
-#             )
-#         ],
-#             className="banner"
-#         ),
-#         html.Div(className="row", style={'margin-bottom':'8px'}, children=[
-#             html.Div(className="ten columns", children=[
-#                 html.Div(
-#                     className="four columns",
-#                     children=[
-#                         html.H6('Position:'),
-#                         dcc.Dropdown(
-#                             id='position_dropdown',
-#                             options = positions,
-#                             placeholder='Select a position',
-#                             value = ['data scientist', 'data analyst'],
-#                             multi = True
-#                         )
-#                     ]
-#                 ),
-#
-#                 ]
-#             )
-#             ]
-#         ),
-#         #Location drop-down component
-#         html.Div(
-#             className="four columns",
-#             children=[
-#                 html.H6('Location:'),
-#                 dcc.Dropdown(
-#                     id='location_dropdown',
-#                     options = locations,
-#                     placeholder='Select a location',
-#                     value = ["Montréal%2C+QC"],
-#                     multi = True
-#                 )
-#             ]
-#         ),
-#
-#         # Date range selection component.
-#         html.Div(
-#             # html.H4('Select Start and End Date:'),
-#             children=[ html.H6('Start and End Date:'),
-#                 dcc.DatePickerRange(
-#                     id='date_picker_range',
-#                     start_date = start_date,
-#                     end_date = end_date
-#                 )],
-#             # style={'width': '30%', 'display': 'block'},
-#             className='four columns'
-#         ),
-#         # Submit button component.
-#         html.Div(
-#             children = html.Button(
-#                 id = 'submit_button',
-#                 n_clicks=0,
-#                 children='Submit',
-#                 # style={'fontSize':24, 'marginLeft':'20px'}
-#             ),
-#             className='one columns'
-#         )
-# ])
-
-
-                # html.Div(
-                #     className="four columns",
-                #     children=[
-                #         html.H6('Location:'),
-                #         dcc.Dropdown(
-                #             id='location_dropdown',
-                #             options = locations,
-                #             placeholder='Select a location',
-                #             value = ["Montréal%2C+QC"],
-                #             multi = True
-                #         )
-                #     ]
-                # ),
-#                 html.Div(
-#                     # html.H4('Select Start and End Date:'),
-#                     children=[ html.H6('Start and End Date:'),
-#                         dcc.DatePickerRange(
-#                             id='date_picker_range',
-#                             start_date = start_date,
-#                             end_date = end_date
-#                         )],
-#                     # style={'width': '30%', 'display': 'block'},
-#                     className='four columns'
-#                 ),
-#                 html.Div(
-#                     children = html.Button(
-#                         id = 'submit_button',
-#                         n_clicks=0,
-#                         children='Submit',
-#                         # style={'fontSize':24, 'marginLeft':'20px'}
-#                     ),
-#                     className='one columns'
-#                 )
-#
-#             ]),
-#
-#             # html.Div(id="div-total-step-count", className="two columns")
-#         ]),
-#         ],
-#         className="container"
-#     ),
-#     html.Div([ dcc.Graph(id='feature_graphic',
-#                         figure = {'data':[
-#                                     {'x': [1,2], 'y': [3,1]}],
-#                         'layout':{'title': ''}})]),
-#     html.Div([ dcc.Graph(id='feature_graphic2',
-#                         figure = {'data':[
-#                                     {'x': [1,2], 'y': [3,1]}],
-#                         'layout':{'title': ''}})]),
-#     html.Div([
-#         dcc.Graph(
-#             id='companies-barchart',
-#             figure=go.Figure(
-#                 # data = company_traces,
-#                 data=[
-#                     go.Bar(
-#                         x=companies_df.loc["Montréal%2C+QC"].index,
-#                         y=companies_df.loc["Montréal%2C+QC"].values[:30],
-#                         name='Montréal',
-#                         # marker=go.bar.Marker(
-#                         #     color='rgb(55, 83, 109)'
-#                         # )
-#                     ),
-#                 ],
-#                 layout=go.Layout(
-#                     title='top 30 companies by count of jobs postings',
-#                     showlegend=True,
-#                     # legend=go.layout.Legend(
-#                     #     x=0,
-#                     #     y=1.0
-#                     # ),
-#                     # margin=go.Layout.Margin(l=40, r=0, t=40, b=30)
-#                 )
-#             ),
-#             style={'height': 300},
-#         )],
-#     )
-# ]
 
 #app layout.[
 
@@ -257,7 +125,7 @@ app.layout = jobs_layout
 ##############
 ## Callbacks!
 ##############
-register_jobs_dashboard_callbacks(app, jobs_df, companies_df)
+register_jobs_dashboard_callbacks(app, jobs_df, companies_df, summary_df)
 
 # CSS styling
 external_css = [

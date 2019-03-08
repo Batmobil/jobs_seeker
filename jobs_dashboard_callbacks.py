@@ -7,13 +7,27 @@ import plotly.offline as pyo
 import plotly.graph_objs as go
 import ipdb
 
+# Compute words frequencies in jobs postings.
+# nlp imports
+import nltk
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk.corpus import stopwords
+from nltk.tokenize import RegexpTokenizer
+import plotly as py
+import random
+
+from dask import delayed as delay
+from datetime import datetime as dt
+import pandas as pd
+from sqlalchemy import create_engine
+
 ################
 # # Callbacks:
 ################
 # Callback for tabs:
 # TODO: put each tab in separate files.
 
-def register_jobs_dashboard_callbacks(app, jobs_df, companies_df):
+def register_jobs_dashboard_callbacks(app, jobs_df, companies_df, summary_ddf):
     # @app.callback(Output('tabs-content-example', 'children'),
     #               [Input('tabs-example', 'value')])
     # def render_content(tab):
@@ -154,27 +168,70 @@ def register_jobs_dashboard_callbacks(app, jobs_df, companies_df):
 
         print(fig)
         return fig
-        # TODO: correct x-axis issue
-        # for location in locations:
-        #     top30 = companies_df.loc[locations].head(30).reset_index()
-        #     company_traces.append(go.Bar(
-        #                             x=top30['company_name'],
-        #                             y=top30['cnt'],
-        #                             name=location.rstrip(r'%')
-        #                             )
-        #                         )
-        #
-        # fig = { 'data':company_traces,
-        #         'layout':
-        #             {
-        #             'title': 'Top 30 companies by count of jobs postings',
-        #             'showlegend':True,
-        #             'autosize':True,
-        #             'yaxis':{
-        #                 'title':"count of jobs postings"
-        #                 },
-        #             # 'barmode': 'group'
-        #             }
-        #     }
-        # print(fig)
-        # return fig
+
+
+    # update words cloud chart graph for most common words in jobs postings.
+
+    @app.callback(
+        Output('words-cloud', 'figure'),
+        [Input('submit_button', 'n_clicks')],
+        [State('position_dropdown', 'value'),
+         State('location_dropdown', 'value'),
+         State('date_picker_range' ,'start_date'),
+         State('date_picker_range' ,'end_date')],
+        )
+    def update_words_cloud(n_clicks, symbols, locations, start_date, end_date):
+        # from summary_df, we shoul compute the most common words
+        # summary_df.columns = ['date', 'summary']
+
+        # Taking a sample to test program.
+        summary_df = summary_ddf.set_index('date').sort_index()
+        print('start: '  + str(type(start_date)))
+        print(start_date)
+        print(summary_df.head())
+        summary_df = summary_df.loc[pd.to_datetime(start_date).date() : pd.to_datetime(end_date).date()]
+        summary_df = summary_df['summary'] # TODO filter on date range.
+        summary_df = summary_df.drop_duplicates()
+        all_words =[]
+        for description in summary_df:
+            # Tokenizing
+            tokenizer = RegexpTokenizer(r'\w+')
+            tokens = tokenizer.tokenize(description.lower())
+            # Removing stop words.
+            stop_words = set(stopwords.words('english'))
+            words = [word for word in tokens if word not in stop_words]
+            all_words.extend(words)
+        text = nltk.Text(all_words)
+
+        # Calculate Frequency distribution
+        freq = nltk.FreqDist(text)
+
+        # Print and plot most common words
+        words_count = freq.most_common(30)
+        words = [count[0] for count in words_count]
+        frequency = [count[1] for count in words_count]
+        percent = [frequ / sum(frequency) for frequ in frequency]
+        lower, upper = 15, 45
+        frequency = [((x - min(frequency)) / (max(frequency) - min(frequency))) * (upper - lower) + lower for x in frequency]
+
+        # set colors and format.
+        lenth = len(words)
+        colors = [py.colors.DEFAULT_PLOTLY_COLORS[random.randrange(1, 10)] for i in range(lenth)]
+
+        figure=go.Figure(
+            data = [
+                go.Scatter(
+                    x=list(range(lenth)),
+                    y=random.choices(range(lenth), k=lenth),
+                    mode='text',
+                    text=words,
+                    hovertext=['{0}{1}{2}'.format(w, f, format(p, '.2%')) for w, f, p in zip(words, frequency, percent)],
+                    hoverinfo='text',
+                    textfont={'size': frequency, 'color': colors}
+                    )
+                ],
+            layout = go.Layout({'xaxis': {'showgrid': False, 'showticklabels': False, 'zeroline': False},
+                                    'yaxis': {'showgrid': False, 'showticklabels': False, 'zeroline': False}})
+
+        )
+        return figure
