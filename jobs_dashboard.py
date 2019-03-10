@@ -77,9 +77,9 @@ for (city, company) in companies_df.index:
 query_jobs_data = """SELECT * FROM indeed WHERE ts >= %(start)s AND ts < %(end)s """
 rds_connection = 'mysql+mysqldb://baptiste:baptiste86@persoinstance.cy0uxhmwetgv.us-east-1.rds.amazonaws.com:3306/jobs_db?charset=utf8'
 summary_ddf = ddf.read_sql_table('indeed', rds_connection, index_col='ts')
-summary_ddf = summary_ddf[['summary']].reset_index()
+summary_ddf = summary_ddf[['city', 'position', 'summary']].reset_index()
 summary_ddf['date'] = summary_ddf['ts'].dt.date
-summary_df = summary_ddf[['date', 'summary']].compute()
+summary_df = summary_ddf[['date','city', 'position', 'summary']].compute()
 
 
 

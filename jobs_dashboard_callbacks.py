@@ -180,17 +180,21 @@ def register_jobs_dashboard_callbacks(app, jobs_df, companies_df, summary_ddf):
          State('date_picker_range' ,'start_date'),
          State('date_picker_range' ,'end_date')],
         )
-    def update_words_cloud(n_clicks, symbols, locations, start_date, end_date):
+    def update_words_cloud(n_clicks, positions, locations, start_date, end_date):
         # from summary_df, we shoul compute the most common words
-        # summary_df.columns = ['date', 'summary']
+        # summary_df.columns = ['date', 'city', 'position', 'summary']
 
         # Taking a sample to test program.
         summary_df = summary_ddf.set_index('date').sort_index()
         print('start: '  + str(type(start_date)))
         print(start_date)
         print(summary_df.head())
+        # select data from filters selections.
         summary_df = summary_df.loc[pd.to_datetime(start_date).date() : pd.to_datetime(end_date).date()]
-        summary_df = summary_df['summary'] # TODO filter on date range.
+        filters_select = (summary_df['city'].isin(locations)) & (summary_df['position'].isin(positions))
+        summary_df = summary_df[filters_select]
+
+        summary_df = summary_df['summary']
         summary_df = summary_df.drop_duplicates()
         all_words =[]
         for description in summary_df:
