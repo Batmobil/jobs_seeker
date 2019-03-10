@@ -57,13 +57,13 @@ def register_jobs_dashboard_callbacks(app, jobs_df, companies_df, summary_ddf):
          State('date_picker_range' ,'start_date'),
          State('date_picker_range' ,'end_date')],
         )
-    def update_graph(n_clicks, symbols, locations, start_date, end_date):
+    def update_graph(n_clicks, positions, locations, start_date, end_date):
         traces = []
-        for symb in symbols:
+        for position in positions:
             for location in locations:
                 # TODO: to be modified. use index for ts in order to have daily count?
                 # df = web.DataReader(symb, 'iex', start_date, end_date)
-                df = jobs_df[ (jobs_df['position'] == symb) & (jobs_df['city'] == location)]
+                df = jobs_df[ (jobs_df['position'] == position) & (jobs_df['city'] == location)]
                 df = df.groupby('ts')['cnt'].sum()
                 traces.append({'x': df.index, 'y': df.values, 'name': symb + ' - ' + location.split('%')[0]})
         fig = { 'data':traces,
@@ -137,10 +137,12 @@ def register_jobs_dashboard_callbacks(app, jobs_df, companies_df, summary_ddf):
          State('date_picker_range' ,'start_date'),
          State('date_picker_range' ,'end_date')],
         )
-    def update_barchart(n_clicks, symbols, locations, start_date, end_date):
+    def update_barchart(n_clicks, positions, locations, start_date, end_date):
         company_traces = []
         # This part works to top30 for locations mixed.
         companies_locations = companies_df.loc[locations]
+        # Adding position selection.
+        companies_locations = companies_locations[companies_locations['positions'].isin(positions)]
         top30 = companies_locations.head(30)
         top30 = top30.reset_index()
         # for location in locations:
