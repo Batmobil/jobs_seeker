@@ -28,26 +28,6 @@ from sqlalchemy import create_engine
 # TODO: put each tab in separate files.
 
 def register_jobs_dashboard_callbacks(app, jobs_df, companies_df, summary_ddf):
-    # @app.callback(Output('tabs-content-example', 'children'),
-    #               [Input('tabs-example', 'value')])
-    # def render_content(tab):
-    #     if tab == 'tab-1-example':
-    #         return tab_1_layout
-    #     elif tab == 'tab-2-example':
-    #         return html.Div([
-    #             html.H3('Tab content 2'),
-    #             dcc.Graph(
-    #                 id='graph-2-tabs',
-    #                 figure={
-    #                     'data': [{
-    #                         'x': [1, 2, 3],
-    #                         'y': [5, 10, 6],
-    #                         'type': 'bar'
-    #                     }]
-    #                 }
-    #             )
-    #         ])
-    #
 
     @app.callback(
         Output('feature_graphic', 'figure'),
@@ -65,10 +45,10 @@ def register_jobs_dashboard_callbacks(app, jobs_df, companies_df, summary_ddf):
                 # df = web.DataReader(symb, 'iex', start_date, end_date)
                 df = jobs_df[ (jobs_df['position'] == position) & (jobs_df['city'] == location)]
                 df = df.groupby('ts')['cnt'].sum()
-                traces.append({'x': df.index, 'y': df.values, 'name': symb + ' - ' + location.split('%')[0]})
+                traces.append({'x': df.index, 'y': df.values, 'name': position + ' - ' + location.split('%')[0]})
         fig = { 'data':traces,
                 'layout':{
-                'title': symbols,
+                'title': positions,
                 'autosize':True,
                 'yaxis':{
                     'title':"# of jobs"
@@ -140,9 +120,10 @@ def register_jobs_dashboard_callbacks(app, jobs_df, companies_df, summary_ddf):
     def update_barchart(n_clicks, positions, locations, start_date, end_date):
         company_traces = []
         # This part works to top30 for locations mixed.
+        # TODO: add position
         companies_locations = companies_df.loc[locations]
         # Adding position selection.
-        companies_locations = companies_locations[companies_locations['positions'].isin(positions)]
+        # companies_locations = companies_locations[companies_locations['position'].isin(positions)]
         top30 = companies_locations.head(30)
         top30 = top30.reset_index()
         # for location in locations:

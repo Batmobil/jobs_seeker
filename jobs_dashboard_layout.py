@@ -75,10 +75,18 @@ lenth = len(words)
 colors = [py.colors.DEFAULT_PLOTLY_COLORS[random.randrange(1, 10)] for i in range(lenth)]
 
 def register_jobs_dashboard_layout(positions, locations, start_date, end_date):
+
+
     # tab-1 layout.
     # Banner display
     layout = html.Div(
         children =[
+            html.Div([
+                html.Nav(className = "nav nav-pills", children=[
+                    html.A('Dashboard', className="nav-item active nav-link btn", href='/'),
+                    html.A('Report', className="nav-item nav-link btn", href='/apps/App2')
+                    ]),
+                ]),
             html.Div([
                 html.H2(
                     'Jobs Dashboard',
