@@ -111,15 +111,6 @@ tab_selected_style = {
 
 jobs_layout = register_jobs_dashboard_layout(positions, locations, start_date, end_date)
 app.layout = jobs_layout
-#  html.Div([ # ext div.
-#     # dcc.Tabs(id="tabs-example", value='tab-1-example', children=[
-#     #     dcc.Tab(label='Tab One', value='tab-1-example', style=tab_style, selected_style=tab_selected_style),
-#     #     dcc.Tab(label='Tab Two', value='tab-2-example', style=tab_style, selected_style=tab_selected_style),
-#     # ],
-#     # style=tabs_styles),
-#     # html.Div(id='tabs-content-example'),
-#     tab_1_layout
-# ], style={'padding':10})
 
 
 ##############
@@ -133,7 +124,8 @@ external_css = [
     "https://fonts.googleapis.com/css?family=Open+Sans|Roboto"  # Fonts
     "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css",
     "https://cdn.rawgit.com/xhlulu/0acba79000a3fd1e6f552ed82edb8a64/raw/dash_template.css",
-    "https://rawgit.com/plotly/dash-live-model-training/master/custom_styles.css"
+    "https://rawgit.com/plotly/dash-live-model-training/master/custom_styles.css",
+    "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
 ]
 
 for css in external_css:
