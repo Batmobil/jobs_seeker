@@ -83,8 +83,11 @@ def register_jobs_dashboard_layout(positions, locations, start_date, end_date):
         children =[
             html.Div([
                 html.Nav(className = "nav nav-pills", children=[
-                    html.A('Dashboard', className="nav-item active nav-link btn", href='/'),
-                    html.A('Report', className="nav-item nav-link btn", href='/apps/App2')
+                    html.A('Dashboard', className="nav-item active nav-link btn", href='/job_seeker'),
+                    html.A('Report', className="nav-item nav-link btn", href='/apps/App2'),
+                    html.A('Dask', className="nav-item nav-link btn", href='/dask'),
+                    html.A('Notes', className="nav-item nav-link btn", href='/notes'),
+                    html.A('Useful Links', className="nav-item nav-link btn", href='/links'),
                     ]),
                 ]),
             html.Div([

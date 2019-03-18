@@ -34,24 +34,58 @@ jobs_df = jobs_data.compute()
 # Taking a sample to test program.
 ex = jobs_df.loc[:, 'summary']
 ex = ex.drop_duplicates()
-all_words =[]
+# Processing with nltk
+# all_words =[]
+# for description in ex:
+#
+#     # Tokenizing
+#     tokenizer = RegexpTokenizer(r'\w+')
+#     tokens = tokenizer.tokenize(description.lower())
+#
+#     # Removing stop words.
+#     stop_words = set(stopwords.words('english'))
+#     words = [word for word in tokens if word not in stop_words]
+#
+#     print(words)
+#     all_words.extend(words)
+#
+# text = nltk.Text(all_words)
+# # Calculate Frequency distribution
+# freq = nltk.FreqDist(text)
+#
+# # Print and plot most common words
+# print(freq.most_common(20))
+# # freq.plot(10)
+
+# ---------------------
+import spacy
+from collections import Counter
+from spacy.lang.en import English
+nlp = spacy.load('en')
+parser = English()
+a_words = []
+a_nouns = []
 for description in ex:
+    doc = nlp(description)
 
-    # Tokenizing
-    tokenizer = RegexpTokenizer(r'\w+')
-    tokens = tokenizer.tokenize(description.lower())
+    # get the tokens using spaCy
+    # tokens = parser(doc)
+    # # lemmatize
+    # lemmas = []
+    # for tok in tokens:
+    #     lemmas.append(tok.lemma_.lower().strip() if tok.lemma_ != "-PRON-" else tok.lower_)
+    # tokens = lemmas
+    # all tokens that arent stop words or punctuations
+    words = [token.lemma_ for token in doc if token.is_stop != True and token.is_punct != True]
+    a_words.extend(words)
 
-    # Removing stop words.
-    stop_words = set(stopwords.words('english'))
-    words = [word for word in tokens if word not in stop_words]
+    # noun tokens that arent stop words or punctuations
+    nouns = [token.lemma_ for token in doc if token.is_stop != True and token.is_punct != True and token.pos_ == "NOUN"]
+    a_nouns.extend(nouns)
+# five most common tokens
+word_freq = Counter(a_words)
+common_words = word_freq.most_common(5)
 
-    print(words)
-    all_words.extend(words)
-
-text = nltk.Text(all_words)
-# Calculate Frequency distribution
-freq = nltk.FreqDist(text)
-
-# Print and plot most common words
-print(freq.most_common(20))
-# freq.plot(10)
+# five most common noun tokens
+noun_freq = Counter(a_nouns)
+common_nouns = noun_freq.most_common(5)

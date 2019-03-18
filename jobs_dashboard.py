@@ -1,4 +1,4 @@
-# Code along project
+# Dash project
 ###################
 
 # Imports.
@@ -10,6 +10,7 @@ from dash.dependencies import Input, Output, State
 import plotly.offline as pyo
 import plotly.graph_objs as go
 
+
 from datetime import datetime as dt
 # import pandas_datareader.data as web
 import pandas as pd
@@ -19,7 +20,11 @@ import dask.dataframe as ddf
 import ipdb
 # project import
 from jobs_dashboard_callbacks import register_jobs_dashboard_callbacks
+
+# TODO: change for layouts folder and import all layout files.
 from jobs_dashboard_layout import register_jobs_dashboard_layout
+from notes_layout import register_notes_layout
+from dask_layout import register_dask_layout
 
 # nlp imports
 import nltk
@@ -107,10 +112,47 @@ tab_selected_style = {
 # # Define layout.
 ###################
 
-#app layout.[
-
+# page layout for jobs dashboard.
 jobs_layout = register_jobs_dashboard_layout(positions, locations, start_date, end_date)
-app.layout = jobs_layout
+notes_layout = register_notes_layout()
+dask_layout = register_dask_layout()
+
+app.layout = html.Div([
+    dcc.Location(id='url', refresh=False),
+    html.Div(id='page-content')
+])
+
+######
+# Callbacks to update page.
+######
+
+######################## 404 Page ########################
+
+noPage = html.Div([
+    # CC Header
+    # Header(),
+    html.P(["404 Page not found"])
+    ])
+
+@app.callback(Output('page-content', 'children'),
+              [Input('url', 'pathname')])
+def display_page(pathname):
+    if pathname == '/job_seeker':
+        return jobs_layout
+    elif pathname == '/dask':
+        return dask_layout
+    elif pathname == '/notes':
+        return notes_layout
+    elif pathname == '/links':
+        return layout_links
+    # elif pathname == '/cc-travel-report/display/':
+    #     return layout_display
+    # elif pathname == '/cc-travel-report/publishing/':
+    #     return layout_publishing
+    # elif pathname == '/cc-travel-report/metasearch-and-travel-ads/':
+    #     return layout_metasearch
+    else:
+        return noPage
 
 
 ##############

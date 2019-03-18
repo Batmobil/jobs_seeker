@@ -98,8 +98,11 @@ for position in positions:
                         job_post.append(div_loc.text)
                 #grabbing summary text
                 d = div.findAll('span', attrs={'class': 'summary'})
-                for span in d:
-                    job_post.append(span.text.strip())
+                if d == []:
+                    job_post.append('No summary')
+                else:
+                    for span in d:
+                        job_post.append(span.text.strip())
                 #grabbing salary
                 try:
                     job_post.append(div.find('nobr').text)

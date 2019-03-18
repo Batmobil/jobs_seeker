@@ -37,3 +37,10 @@ tracking on plotly dash community
 Tracking and basic NLP on Nuclear and SCWR
 ---
 Deployment on AWS ElasticBeanStalk, add a Dockerrun.aws.json file and zip all the files at root (not the root folder) in a zip
+
+
+---------------------
+
+Nuclear literature review
+
+Numbers of papers downloaded from arxiv by year, (DRAGON simulation code sections: nuclear experiments, instrumentation and detectors, high-energy physics)
