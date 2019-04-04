@@ -7,7 +7,6 @@ import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
 import plotly as py
-import random
 
 # Compute words frequencies in jobs postings.
 # nlp imports
@@ -20,6 +19,7 @@ from dask import delayed as delay
 from datetime import datetime as dt
 import pandas as pd
 from sqlalchemy import create_engine
+import random
 
 # fetch data from DB.
 @delay
@@ -102,6 +102,44 @@ def register_jobs_dashboard_layout(positions, locations, start_date, end_date):
                 className="banner"
             ),
             html.Div(className="container", children=[
+
+                html.Div(
+                      [
+                        dcc.Markdown(
+                            '''
+                            ### Project description:
+                            Looking for a job as a data analyst or data scientist, I wanted to get a better idea of the job market
+                            for these two positions in Montreal, Qc.
+                            So I gathered few pieces together in order to get a functionnal dashboard of number of jobs postings for both positions in Montreal.
+                            * I used a web scraper script (scrape_jobs.py) to fetch various jobs posting info and do basic processing data
+                            from a very popular jobs aggregator website and store these info into a MySQL database on AWS (RDS).
+                            For now, this script has to be run manually every day but we could automatate the daily scraping with a basic cronjob on a remote server/instance.
+
+                            * On the visualisation side, I used the excellent Dash library from Plotly as an open source tool to visualize data.
+                            As the Dash app is based on Flask, some knowledge about flask framework were required.
+
+                            To display data, some procession is done between the database query and the various visualisations, pandas, dask, and nltk (word cloud) packages were of great help.
+                            The use of nltk make the dashboard a bit slow to load at start as Dash do all the data processing and load necessary data for the dashboard in memory.
+                            The dashboard is not refreshed automatically with new daily data as this is one limitation from plotly similarly as Tableau or other BI tools, Dash does not allow
+                            data streaming out of the box, but the use of Redis or other strategies could allow to achieve this result if necessary.
+
+                            Some future improvements at various levels can be done:
+                            * Port the mutipage dash app to a more classic flask app, allowing web development of other pages easily while keeping the dashboards.
+                            * Adding some other visualisations to the jobs dashboard, like gauge for variations fro week to week for instance.
+                            * Improve the word cloud display, both on processing, while I wanted to be able to make the filter work on the word cloud, this make the app very slow to load
+                            as some data (basic nlp woth nltk) processing is happening behind the scene. Also a decicated wrod cloud dash component can be improved with a react component that has yet to be develop by the Dash community.
+
+                            The code for this project is available on github [here](https://github.com/Batmobil/jobs_seeker).
+
+                            '''.replace('  ', '')
+                            ,
+                            className='ten columns'
+                        )
+                      ],
+                      className='row',
+                      style={'text-align': 'left', 'margin-bottom': '15px'}
+                  ),
+
                 html.Div(className="row", style={'margin-bottom':'8px'}, children=[
                     html.Div(className="ten columns", children=[
                         html.Div(
@@ -113,7 +151,7 @@ def register_jobs_dashboard_layout(positions, locations, start_date, end_date):
                                     options = positions,
                                     placeholder='Select a position',
                                     value = ['data scientist', 'data analyst'],
-                                    multi = True
+                                    multi = The code for this project is available on github [here](https://github.com/Batmobil/jobs_seeker).True
                                 )
                             ]
                         ),
@@ -160,17 +198,44 @@ def register_jobs_dashboard_layout(positions, locations, start_date, end_date):
                 ),
 
             ]),
-            html.Div(className="container", children=[
 
-                html.Div([ dcc.Graph(id='feature_graphic',
-                                    figure = {'data':[
-                                                {'x': [1,2], 'y': [3,1]}],
-                                    'layout':{'title': ''}})]),
-                html.Div([ dcc.Graph(id='feature_graphic2',
+            # Words cloud
+            html.Div(className='container',children=[
+                html.Div(className = 'twelve columns', children=[
+                dcc.Graph(
+                    id='words-cloud',
+                    figure=go.Figure(
+                        # data = company_traces,
+
+                        data = [
+                            go.Scatter(
+                                x=list(range(lenth)),
+                                y=random.choices(range(lenth), k=lenth),
+                                mode='text',
+                                text=words,
+                                hovertext=['{0}{1}{2}'.format(w, f, format(p, '.2%')) for w, f, p in zip(words, frequency, percent)],
+                                hoverinfo='text',
+                                textfont={'size': frequency, 'color': colors}
+                                )
+                            ],
+                        layout = go.Layout({'xaxis': {'showgrid': False, 'showticklabels': False, 'zeroline': False},
+                                                'yaxis': {'showgrid': False, 'showticklabels': False, 'zeroline': False}})
+
+                    ),
+                    style={'height': 300},
+                )
+            ])]),
+            html.Div(className="container", children=[
+                html.Div(className= 'six columns', children=[
+                    html.Div([ dcc.Graph(id='feature_graphic',
+                                        figure = {'data':[
+                                                    {'x': [1,2], 'y': [3,1]}],
+                                        'layout':{'title': ''}})]),
+                            html.Div([ dcc.Graph(id='feature_graphic2',
                                     figure = {'data':[
                                                 {'x': [1,2], 'y': [3,1]}],
                                     'layout':{'title': ''}})])
-
+                ])
             ]),
             html.Div(className='container',children=[
                 dcc.Graph(
@@ -202,31 +267,7 @@ def register_jobs_dashboard_layout(positions, locations, start_date, end_date):
                     style={'height': 300},
                 )
             ]),
-            # Words cloud
-            html.Div(className='container',children=[
-                dcc.Graph(
-                    id='words-cloud',
-                    figure=go.Figure(
-                        # data = company_traces,
 
-                        data = [
-                            go.Scatter(
-                                x=list(range(lenth)),
-                                y=random.choices(range(lenth), k=lenth),
-                                mode='text',
-                                text=words,
-                                hovertext=['{0}{1}{2}'.format(w, f, format(p, '.2%')) for w, f, p in zip(words, frequency, percent)],
-                                hoverinfo='text',
-                                textfont={'size': frequency, 'color': colors}
-                                )
-                            ],
-                        layout = go.Layout({'xaxis': {'showgrid': False, 'showticklabels': False, 'zeroline': False},
-                                                'yaxis': {'showgrid': False, 'showticklabels': False, 'zeroline': False}})
-
-                    ),
-                    style={'height': 300},
-                )
-            ])
 
     ])
     return layout

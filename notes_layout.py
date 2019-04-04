@@ -31,11 +31,11 @@ def register_notes_layout():
                             Under the hood, it uses: AWS RDS as a database for jobs dashboard data, use pandas, dask, nltk for various data processing for this dashboard.
 
 
-                            Here are some useful links that helped me setting me up this app:
+                            Here are some useful links that helped me setting up this app:
                                 - The plotly dash library and [documentation](https://dash.plot.ly/).
                                 - The excellent detailed [article](https://towardsdatascience.com/how-to-build-a-complex-reporting-dashboard-using-dash-and-plotl-4f4257c18a7f) on multipage Dash app from David Comfort (setting all of these in two weeks from scratch, nice job!).
                                 - Dask [library](https://docs.dask.org/en/latest/).
-                                - The very enlightning [article](https://docs.dask.org/en/latest/) on data processing with Dask by Eric Ness.
+                                - The very enlightning [article](https://medium.com/when-i-work-data/processing-data-with-dask-47e4233cf165) on data processing with Dask by Eric Ness.
 
 
                             ### Here are some useful snippets for the use of dask, a library that deserves better recognition.
