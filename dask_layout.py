@@ -19,6 +19,7 @@ def register_dask_layout():
                     html.A('Dashboard', className="nav-item nav-link btn", href='/job_seeker'),
                     html.A('Report', className="nav-item nav-link btn", href='/apps/App2'),
                     html.A('Dask', className="nav-item active nav-link btn", href='/dask'),
+                    html.A('RAPIDS', className="nav-item nav-link btn", href='/rapids'),
                     html.A('Notes', className="nav-item nav-link btn", href='/notes'),
                     html.A('Useful Links', className="nav-item nav-link btn", href='/links'),
                     ]),
@@ -31,7 +32,7 @@ def register_dask_layout():
                             ```python
                             import dask.dataframe as ddf
                             #Loading Word clouds data.
-                            query_jobs_data = """SELECT * FROM indeed WHERE ts >= %(start)s AND ts < %(end)s """
+                            query_jobs_data = """SELECT * FROM tablename WHERE ts >= %(start)s AND ts < %(end)s """
                             rds_connection = ####connection_string####
                             summary_ddf = ddf.read_sql_table(####table_name####, rds_connection, index_col='ts')
                             summary_ddf = summary_ddf[['city', 'position', 'summary']].reset_index()
