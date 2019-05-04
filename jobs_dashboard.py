@@ -15,7 +15,7 @@ from datetime import datetime as dt
 # import pandas_datareader.data as web
 import pandas as pd
 from sqlalchemy import create_engine
-from dask import delayed as delay
+import dask.delayed as delay
 import dask.dataframe as ddf
 import ipdb
 # project import
@@ -31,7 +31,7 @@ import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
-
+import configparser
 # fetch data from DB.
 @delay
 def lazy_fetch_rds_mysql(engine, query, params={}):
@@ -44,19 +44,21 @@ def lazy_fetch_rds_mysql(engine, query, params={}):
         engineCon.close()
     return df
 # Define app and authentication.
-USERNAME_PASSWORD_PAIRS = [['baptiste', 'baptiste86']]
+# USERNAME_PASSWORD_PAIRS = [['baptiste', 'baptiste86']]
 app = dash.Dash()
-auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
+# auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
 server = app.server
 app.config['suppress_callback_exceptions']=True # allow to separate the layout for each tab in separate callbacks.
 
 ######COMPUTE DATA TO PASS TO CALLBACKS.
-
+# Fetch data connection info
+connections_config = configparser.ConfigParser()
+connections_config.read('db_connections.ini')
 # Count by company.
 start_date = dt(2019, 1, 1)
 end_date = dt.now()
 query_jobs_data = """SELECT * FROM indeed WHERE ts >= %(start)s AND ts < %(end)s """
-rds_connection = 'mysql+mysqldb://baptiste:baptiste86@persoinstance.cy0uxhmwetgv.us-east-1.rds.amazonaws.com:3306/jobs_db?charset=utf8'
+rds_connection = 'mysql+mysqldb://{}:{}@persoinstance.cy0uxhmwetgv.us-east-1.rds.amazonaws.com:3306/jobs_db?charset=utf8'.format(connections_config['jobs_db']['user'], connections_config['jobs_db']['password'])
 rds_engine = create_engine(rds_connection)
 jobs_data = lazy_fetch_rds_mysql(rds_engine, query_jobs_data, params={'start': start_date, 'end': end_date})
 jobs_df = jobs_data.compute()
@@ -77,10 +79,9 @@ for (city, company) in companies_df.index:
         # df = df.groupby('ts')['cnt'].sum()
     company_traces.append({'x': company, 'y': companies_df.loc[(city, company)], 'name':company})
 
-
 # Word clouds data.
 query_jobs_data = """SELECT * FROM indeed WHERE ts >= %(start)s AND ts < %(end)s """
-rds_connection = 'mysql+mysqldb://baptiste:baptiste86@persoinstance.cy0uxhmwetgv.us-east-1.rds.amazonaws.com:3306/jobs_db?charset=utf8'
+rds_connection = 'mysql+mysqldb://{}:{}@persoinstance.cy0uxhmwetgv.us-east-1.rds.amazonaws.com:3306/jobs_db?charset=utf8'.format(connections_config['jobs_db']['user'], connections_config['jobs_db']['password'])
 summary_ddf = ddf.read_sql_table('indeed', rds_connection, index_col='ts')
 summary_ddf = summary_ddf[['city', 'position', 'summary']].reset_index()
 summary_ddf['date'] = summary_ddf['ts'].dt.date
