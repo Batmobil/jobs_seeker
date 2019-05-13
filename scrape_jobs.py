@@ -8,6 +8,8 @@ import requests
 from sqlalchemy import create_engine
 from datetime import datetime
 from dask import delayed as delay
+# connection infos obfuscation with configparser
+import configparser
 # import ipdb
 
 def fetch_rds_mysql(query, params={}):
@@ -52,7 +54,7 @@ def push_rds_mysql_table(engine, df, table):
 
 max_results_per_city = 300
 city_set = ["Montréal%2C+QC", "Vancouver%2C+BC"]
-positions = ["data+scientist", "data+analyst"]
+positions = ["data+scientist", "data+analyst", "data+engineer"]
 columns = ["city", "job_title", "company_name", "location", "summary", "salary"]
 sample_df = pd.DataFrame(columns = columns)
 
@@ -123,7 +125,12 @@ for position in positions:
     #
     # saving sample_df as a local csv file - define your own local path to save contents
     # sample_df.to_csv("[filepath].csv", encoding='utf-8')
-    rds_connection = 'mysql+mysqldb://baptiste:baptiste86@persoinstance.cy0uxhmwetgv.us-east-1.rds.amazonaws.com:3306/jobs_db?charset=utf8'
+
+
+    # TO DO: obfuscate connection info
+    connections_config = configparser.ConfigParser()
+    connections_config.read('db_connections.ini')
+    rds_connection = 'mysql+mysqldb://{}:{}@persoinstance.cy0uxhmwetgv.us-east-1.rds.amazonaws.com:3306/jobs_db?charset=utf8'.format(connections_config['jobs_db']['user'], connections_config['jobs_db']['password'])
     rds_engine = create_engine(rds_connection)
     print('Appending {} rows to table.'.format(jobs_reduced))
     push_rds_mysql_table(rds_engine, jobs_reduced, 'indeed' )
