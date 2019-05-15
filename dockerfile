@@ -1,4 +1,4 @@
-FROM python:3.6.7
+FROM python:3.6.8
 
 COPY requirements/linux_pip_requirements.txt /
 RUN pip install -r /linux_pip_requirements.txt
