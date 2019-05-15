@@ -90,9 +90,9 @@ def register_jobs_dashboard_layout(positions, locations, start_date, end_date):
             html.Div([
                 html.Nav(className = "nav nav-pills", children=[
                     html.A('Dashboard', className="nav-item active nav-link btn", href='/job_seeker'),
-                    html.A('Report', className="nav-item nav-link btn", href='/apps/App2'),
+                    # html.A('Report', className="nav-item nav-link btn", href='/apps/App2'),s
                     html.A('Dask', className="nav-item nav-link btn", href='/dask'),
-                    html.A('RAPIDS', className="nav-item nav-link btn", href='/rapids'),
+                    # html.A('RAPIDS', className="nav-item nav-link btn", href='/rapids'),
                     html.A('Notes', className="nav-item nav-link btn", href='/notes'),
                     html.A('Useful Links', className="nav-item nav-link btn", href='/links'),
                     ]),
@@ -116,10 +116,10 @@ def register_jobs_dashboard_layout(positions, locations, start_date, end_date):
                             ### Project description:
                             Looking for a job as a data analyst or data scientist, I wanted to get a better idea of the job market
                             for these two positions in Montreal, Qc.
-                            * I used a web scraper script (scrape_jobs.py) to fetch various jobs posting info and do basic processing data
+                              * I used a web scraper script (scrape_jobs.py) to fetch various jobs posting info and do basic processing data
                             from a very popular jobs aggregator website and store these info into a MySQL database on AWS (RDS).
                             For now, this script has to be run manually every day but we could automatate the daily scraping with a basic cronjob on a remote server/instance.
-                            * On the visualisation side, I used the excellent Dash library from Plotly as an open source tool to visualize data.
+                              * On the visualisation side, I used the excellent Dash library from Plotly as an open source tool to visualize data.
                             As the Dash app is based on Flask, some knowledge about flask framework were required.
 
                                 To display data, some processing is done between the database query and the various visualisations, pandas, dask, and nltk (word cloud) packages were of great help.
@@ -128,9 +128,9 @@ def register_jobs_dashboard_layout(positions, locations, start_date, end_date):
                             data streaming out of the box, but the use of Redis or other strategies could allow to achieve this result if necessary.
 
                             Some future improvements at various levels can be done:
-                            *   Port the mutipage dash app to a more classic flask app, allowing web development of other pages easily while keeping the dashboards.
-                            *   Adding some other visualisations to the jobs dashboard, like gauge for variations fro week to week for instance.
-                            *   Improve the word cloud display, both on processing and visual, while I wanted to be able to make the filters interactive with the word cloud, this make the app very slow to load
+                              *   Port the mutipage dash app to a more classic flask app, allowing web development of other pages easily while keeping the dashboards.
+                              *   Adding some other visualisations to the jobs dashboard, like gauge for variations fro week to week for instance.
+                              *   Improve the word cloud display, both on processing and visual, while I wanted to be able to make the filters interactive with the word cloud, this make the app very slow to load
                             as some data (basic nlp woth nltk) processing is happening behind the scene. Also a decicated word cloud dash component can be improved with a react component that has yet to be develop by the Dash community.
 
                             The code for this project is available on github [here](https://github.com/Batmobil/jobs_seeker).
@@ -257,7 +257,7 @@ def register_jobs_dashboard_layout(positions, locations, start_date, end_date):
                             ),
                         ],
                         layout=go.Layout(
-                            title='top 30 companies by count of jobs postings',
+                            title='top 30 companies by count of jobs postings for the last 30 days',
                             showlegend=True,
                             # legend=go.layout.Legend(
                             #     x=0,

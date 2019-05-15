@@ -17,9 +17,9 @@ def register_dask_layout():
             html.Div([
                 html.Nav(className = "nav nav-pills", children=[
                     html.A('Dashboard', className="nav-item nav-link btn", href='/job_seeker'),
-                    html.A('Report', className="nav-item nav-link btn", href='/apps/App2'),
+                    # html.A('Report', className="nav-item nav-link btn", href='/apps/App2'),
                     html.A('Dask', className="nav-item active nav-link btn", href='/dask'),
-                    html.A('RAPIDS', className="nav-item nav-link btn", href='/rapids'),
+                    # html.A('RAPIDS', className="nav-item nav-link btn", href='/rapids'),
                     html.A('Notes', className="nav-item nav-link btn", href='/notes'),
                     html.A('Useful Links', className="nav-item nav-link btn", href='/links'),
                     ]),

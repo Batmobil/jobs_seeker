@@ -10,8 +10,8 @@ from dash.dependencies import Input, Output, State
 import plotly.offline as pyo
 import plotly.graph_objs as go
 
-
 from datetime import datetime as dt
+from datetime import timedelta
 # import pandas_datareader.data as web
 import pandas as pd
 from sqlalchemy import create_engine
@@ -25,6 +25,7 @@ from jobs_dashboard_callbacks import register_jobs_dashboard_callbacks
 from jobs_dashboard_layout import register_jobs_dashboard_layout
 from notes_layout import register_notes_layout
 from dask_layout import register_dask_layout
+from links_layout import register_links_layout
 
 # nlp imports
 import nltk
@@ -68,9 +69,11 @@ positions = [{'label': pos, 'value': pos} for pos in sorted(jobs_df['position'].
 cities = jobs_df['city'].str.strip('%').unique().tolist()
 locations = [{'label': loc.split('%2C')[0], 'value': loc} for loc in sorted(jobs_df['city'].unique().tolist())]
 
-# count by company:
+# count by company for the last 30 days:
+thirty_days_back = dt.today().date() - timedelta(days=30)
 company_traces = []
-companies_df = jobs_df.groupby(['city', 'company_name'])['cnt'].sum().sort_values(ascending=False)
+companies_df = jobs_df[jobs_df['ts'] > thirty_days_back ]
+companies_df = companies_df.groupby(['city', 'company_name'])['cnt'].sum().sort_values(ascending=False)
 companies = companies_df.index.get_level_values(1).tolist()
 # TODO: to be corrected as now companies_df has city index as ell.
 # for city in companies_df.index.get_level_values(0).tolist():
@@ -117,6 +120,7 @@ tab_selected_style = {
 jobs_layout = register_jobs_dashboard_layout(positions, locations, start_date, end_date)
 notes_layout = register_notes_layout()
 dask_layout = register_dask_layout()
+links_layout = register_links_layout()
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
@@ -145,7 +149,7 @@ def display_page(pathname):
     elif pathname == '/notes':
         return notes_layout
     elif pathname == '/links':
-        return layout_links
+        return links_layout
     # elif pathname == '/cc-travel-report/display/':
     #     return layout_display
     # elif pathname == '/cc-travel-report/publishing/':

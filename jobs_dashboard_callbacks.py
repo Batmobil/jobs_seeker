@@ -140,7 +140,7 @@ def register_jobs_dashboard_callbacks(app, jobs_df, companies_df, summary_ddf):
                             )
         fig = { 'data':company_traces,
                 'layout':{
-                'title': 'Top 30 companies by count of jobs postings',
+                'title': 'Top 30 companies by count of jobs postings for the last 30 days',
                 'showlegend':False,
                 'autosize':True,
                 'yaxis':{

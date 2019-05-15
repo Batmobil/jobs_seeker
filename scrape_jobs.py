@@ -12,10 +12,16 @@ from dask import delayed as delay
 import configparser
 # import ipdb
 
+def load_connection():
+    connections_config = configparser.ConfigParser()
+    connections_config.read('db_connections.ini')
+    rds_connection = 'mysql+mysqldb://{}:{}@persoinstance.cy0uxhmwetgv.us-east-1.rds.amazonaws.com:3306/jobs_db?charset=utf8'.format(connections_config['jobs_db']['user'], connections_config['jobs_db']['password'])
+    return rds_connection
+
 def fetch_rds_mysql(query, params={}):
     """Creates connection to mysql db with sqlaclhemy and returns the results of the query passed as an argument.
     The optionnal 2nd argument allows string interpolation inside the query."""
-    mysql_conn = load_connection('rds_mysql')
+    mysql_conn = load_connection()
     engine = create_engine(mysql_conn)
     try:
         engineCon = engine.connect()
@@ -28,7 +34,7 @@ def fetch_rds_mysql(query, params={}):
 def lazy_fetch_rds_mysql(query, params={}):
     """Creates connection to mysql db with sqlaclhemy and returns the results of the query passed as an argument.
     The optionnal 2nd argument allows string interpolation inside the query."""
-    mysql_conn = load_connection('rds_mysql')
+    mysql_conn = load_connection()
     engine = create_engine(mysql_conn)
     try:
         engineCon = engine.connect()
@@ -40,7 +46,7 @@ def lazy_fetch_rds_mysql(query, params={}):
 def dask_fetch_rds_mysql_table(table, id_col, nb_partitions):
     """Returns a dask dataframe, you must specify rds table name, an indexed orderable column (datetime, int),
     and the number of partitions (>number of cores on the machine)."""
-    mysql_conn = load_connection('rds_mysql')
+    mysql_conn = load_connection()
     dask_df = ddf.read_sql_table(table, mysql_conn, index_col=id_col, npartitions=nb_partitions)
     return dask_df
 
@@ -116,6 +122,7 @@ for position in positions:
                   # except:
                     job_post.append("Nothing_found")
                 #appending list of job post info to dataframe at index num
+                print(job_post)
                 sample_df.loc[num] = job_post
 
     jobs_reduced = sample_df.drop_duplicates()
